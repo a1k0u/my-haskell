@@ -143,7 +143,7 @@ $$ (\lambda z. z) \ (\lambda x y. y \ (x \ w) \ u) \ y $$
 $$(\lambda x'. x' \ (\lambda y'. y' \ x') \ y \ (\lambda v. v \ x)) (\lambda x. v)$$
 
 \subsection{Уберем лишние скобки и осуществим бета-преобразования.}
-$((\lambda x. (\lambda y. ((x \ y) \ z))) \ (a \ (b \ c))) \longrightarrow (\lambda x y. x \ y \ z) \ (a \ (b \ c)) \rightarrow^{\beta} \lambda y. (a \ (b \ c)) \ y \ z$ 
+$((\lambda x. (\lambda y. ((x \ y) \ z))) \ (a \ (b \ c))) \longrightarrow (\lambda x y. x \ y \ z) \ (a \ (b \ c)) \rightarrow^{\beta} \lambda y. a \ (b \ c) \ y \ z$ 
 
 $ $
 
@@ -159,5 +159,69 @@ $\boldsymbol{XOR}$ = $\lambda xy. x \ y \ (y \ tru \ fls) \ fls \ tru$
 
 \subsection{Арифметические операции с числами Чёрча.}
 
+С помощью математической индукции проверим работу $plus', mult'$, которые в дальнейшем будем записывать - "$plus, mult$". Заранее упомянем анонимную функцию $succ = \lambda nsz. s(n \ s \ z)$, с помощью которой будем выполнять шаг идукции, правдивость её работы была доказана на семинаре.
+
+Итак, $plus = \lambda m n s z. m \ s \ (n \ s \ z)$. Пусть числа Чёрча для доказательства базы индукции будут равны: $n = 2$ и $m = 1$. 
+
+$$plus \ 1 \ 2 = (\lambda m n sz. m \ s \ ( n \ s \ z)) \ 1 \ 2 =^{\beta}$$
+$$(\lambda n sz. (\lambda s' z'. s'z') \ s \ ( n \ s \ z)) \ 2 =^{\beta}$$
+$$(\lambda n sz. (\lambda z'. sz') \ ( n \ s \ z)) \ 2 =^{\beta}$$
+$$(\lambda n sz. s ( n \ s \ z)) \ 2 =^{\beta}$$
+$$\lambda sz. s ( (\lambda s'z'. s'(s'z')) \ s \ z)=^{\beta}$$
+$$\lambda sz. s ( (\lambda z'. s(sz')) \ z)=^{\beta}$$
+$$\lambda sz. s ( s \ (s \ z))= 3$$
+
+Предположим, что при $p$ и $k$ выполняется  $plus \ p \ k$, тогда докажем, что $plus \ p \ (succ \ k)$ также выполняется, то есть результат будет равен $int(p) + int(k) + 1$. 
+
+$$plus \ p \ (succ \ k) = (\lambda m n s z. m \ s \ (n \ s \ z)) \ p \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (\lambda s'z'. s'(s'(\dots(s'z')\dots)) \ s \ (n \ s \ z))) \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (\lambda z'. s(s(\dots(s \ z')\dots)) \ (n \ s \ z))) \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. s(s(\dots(s \ (n \ s \ z))\dots))) \ (succ \ k) =^{\beta}$$
+$$\lambda s z. s(s(\dots(s \ ((\lambda ns'z'. s'(n \ s' \ z')) \ k \ s \ z))\dots)) =^{\beta}$$
+$$\lambda s z. s(s(\dots(s \ ((\lambda s'z'. s'((\lambda s''z''. s''(s''(\dots(s''z'')\dots))) \ s' \ z')) \ s \ z))\dots)) =^{\beta}$$
+$$\lambda s z. s(s(\dots(s \ ((\lambda s'z'. s'(s'(s'(\dots(s'z')\dots)))) \ s \ z))\dots)) =^{\beta}$$
+$$\lambda s z. s(s(\dots(s \ (s(s(s(\dots(sz)\dots)))))\dots)) = p + (k + 1)$$
+
+Каждое число Чёрча можно охарактеризовать количеством $s$ в записи, то есть число $p$ имеет $int(p)$ повторений $s$ в теле лямбда-абстракции, анологично для $k$. Грубо говоря, когда мы применили $\beta$-редукцию к $p$, то в абстракторе у числа $p$ осталось $z'$, куда мы редуцируем наше второе число, увеличенное на 1. Значит, что вместо $s$ повторений $p$ раз, мы получаем вместо $z'$ ещё $k+1$ повторений $s$, следовательно количество $s$ равно $p+k+1$, что являтся число Чёрча $p + k + 1$, поэтому результат индукционный шага доказан.    
+
+$$\rule{25em}{0.01em}$$
+
+База индукции для $mult$: $m = 2$ и $n = 3$.
+
+$$mult \ 2 \ 3 = (\lambda m n s z. m \ (n \ s) \ z) \ 2 \ 3 =^{\beta}$$
+$$(\lambda n s z. (\lambda s'z'. s'(s'z')) \ (n \ s) \ z) \ 3 =^{\beta}$$
+$$(\lambda n s z. (\lambda z'. (n \ s)((n \ s) \ z')) \ z) \ 3 =^{\beta}$$
+$$(\lambda n s z. (n \ s)((n \ s) \ z)) \ 3 =^{\beta}$$
+$$\lambda s z. ((\lambda s'z'.s'(s'(s'z'))) \ s)(((\lambda s'z'.s'(s'(s'z'))) \ s) \ z) =^{\beta}$$
+$$\lambda s z. (\lambda z'.s(s(sz')))((\lambda z'.s(s(sz'))) \ z) =^{\beta}$$
+$$\lambda s z. (\lambda z'.s(s(sz')))(s(s(sz))) =^{\beta}$$
+$$\lambda s z. s(s(s(s(s(sz))))) = 6$$
+
+Допустим, что для $p$ и $k$ выполняется $mult \ p \ k$, тогда докажем, что для $mult \ p \ (succ \ k)$ результат также верен.
+
+$$mult \ p \ (succ \ k) = (\lambda m n s z. m \ (n \ s) \ z) \ p \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (\lambda s'z'.s'(s'(\dots(s'z')\dots))) \ (n \ s) \ z) \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (\lambda z'.(n \ s)((n \ s)(\dots((n \ s) \ z')\dots))) \ z) \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (n \ s)((n \ s)(\dots((n \ s) \ z)\dots))) \ (succ \ k) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(((succ \ k) \ s)(\dots((succ \ k) \ s \ z)\dots)) =$$
+$$\lambda s z. ((succ \ k) \ s)(((succ \ k) \ s)(\dots((succ \ k) \ s \ ((succ \ k) \ s \ z))\dots)) =$$
+
+
+Заметим, что $\lambda sz. (succ \ k) \ s \ ((succ \ k) \ s \ z)$ - это $plus \ (succ \ k) \ (succ \ k)$. В предыдущий раз мы доказали верность работы $plus$, поэтому сейчас мы имеем полное право воспользоваться этим. 
+Итак, на данный момент $succ \ k$, который стоит равно $p$ раз вместо предыдущий $s$. Можем записать результат как сложение:
+
+$$\lambda sz. plus \ (succ \ k) (plus \ (succ \  k) (\dots (plus \ (succ \ k) \ (succ \ k)) \dots))$$
+
+Запись выше означает сложение $(k + 1)$ $p$-раз, что и есть $p \cdot (k + 1)$. Однако можно рассуждать иначе (чем-то схоже с $plus$). Каждый раз при раскрытие внутренних скобок мы получаем число, в котором на $k+1$ больше $s$, что характеризует число увеличенное на $k+1$. Делаем так, раскрывая все скобки, и получаем $p \cdot (k + 1)$.
+
+$$\lambda s z. ((succ \ k) \ s)(\dots((succ \ k) \ s \ ((\lambda s'z'. s'((\lambda s''z''. s''(\dots (s''z'') \dots))) \ s' \ z') \ s \ z))\dots) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(\dots((succ \ k) \ s \ ((\lambda s'z'. s'(s'(\dots (s'z') \dots))) \ s \ z))\dots) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(\dots((succ \ k) \ s \ (s(s(\dots (sz) \dots))))\dots) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(\dots((\lambda s'z'. s'((\lambda s''z''. s''(\dots (s''z'') \dots))) \ s' \ z') \ s \ (s(s(\dots (sz) \dots))))\dots) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(\dots((\lambda s'z'. s'(s'(\dots (s'z') \dots))) \ s \ (s(s(\dots (sz) \dots))))\dots) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(\dots((\lambda z'. s(s(\dots (sz') \dots))) \ (s(s(\dots (sz) \dots))))\dots) =^{\beta}$$
+$$\lambda s z. ((succ \ k) \ s)(\dots(s(s(\dots (s(s(s(\dots (sz) \dots))))\dots)) \dots))$$
+
+Так мы и получаем $p\cdot (k + 1)$, проводя $\beta$-редукцию. $\ \ \ \ \ \blacksquare$
 
 \end{document}
