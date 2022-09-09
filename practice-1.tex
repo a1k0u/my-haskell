@@ -106,8 +106,12 @@
 \usepackage{pgfplots}
 \usepackage{pgfplotstable}
 
+\date{ВШЭ ПМИ, 2022 г.} 
+\author{Алексей Косенко}
+
 \begin{document}
 
+\maketitle
 \section{Чистое лямбда-исчисление, практика 1.}
 \subsection{Покажем, что}
 
@@ -159,6 +163,8 @@ $\boldsymbol{XOR}$ = $\lambda xy. x \ y \ (y \ tru \ fls) \ fls \ tru$
 
 \subsection{Арифметические операции с числами Чёрча.}
 
+\subsubsection{Plus.}
+
 С помощью математической индукции проверим работу $plus', mult'$, которые в дальнейшем будем записывать - "$plus, mult$". Заранее упомянем анонимную функцию $succ = \lambda nsz. s(n \ s \ z)$, с помощью которой будем выполнять шаг идукции, правдивость её работы была доказана на семинаре.
 
 Итак, $plus = \lambda m n s z. m \ s \ (n \ s \ z)$. Пусть числа Чёрча для доказательства базы индукции будут равны: $n = 2$ и $m = 1$. 
@@ -174,17 +180,17 @@ $$\lambda sz. s ( s \ (s \ z))= 3$$
 Предположим, что при $p$ и $k$ выполняется  $plus \ p \ k$, тогда докажем, что $plus \ p \ (succ \ k)$ также выполняется, то есть результат будет равен $int(p) + int(k) + 1$. 
 
 $$plus \ p \ (succ \ k) = (\lambda m n s z. m \ s \ (n \ s \ z)) \ p \ (succ \ k) =^{\beta}$$
-$$(\lambda n s z. (\lambda s'z'. s'(s'(\dots(s'z')\dots)) \ s \ (n \ s \ z))) \ (succ \ k) =^{\beta}$$
-$$(\lambda n s z. (\lambda z'. s(s(\dots(s \ z')\dots)) \ (n \ s \ z))) \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (\lambda s'z'. s'(s'(\dots(s'z')\dots))) \ s \ (n \ s \ z)) \ (succ \ k) =^{\beta}$$
+$$(\lambda n s z. (\lambda z'. s(s(\dots(s \ z')\dots))) \ (n \ s \ z)) \ (succ \ k) =^{\beta}$$
 $$(\lambda n s z. s(s(\dots(s \ (n \ s \ z))\dots))) \ (succ \ k) =^{\beta}$$
 $$\lambda s z. s(s(\dots(s \ ((\lambda ns'z'. s'(n \ s' \ z')) \ k \ s \ z))\dots)) =^{\beta}$$
 $$\lambda s z. s(s(\dots(s \ ((\lambda s'z'. s'((\lambda s''z''. s''(s''(\dots(s''z'')\dots))) \ s' \ z')) \ s \ z))\dots)) =^{\beta}$$
 $$\lambda s z. s(s(\dots(s \ ((\lambda s'z'. s'(s'(s'(\dots(s'z')\dots)))) \ s \ z))\dots)) =^{\beta}$$
 $$\lambda s z. s(s(\dots(s \ (s(s(s(\dots(sz)\dots)))))\dots)) = p + (k + 1)$$
 
-Каждое число Чёрча можно охарактеризовать количеством $s$ в записи, то есть число $p$ имеет $int(p)$ повторений $s$ в теле лямбда-абстракции, анологично для $k$. Грубо говоря, когда мы применили $\beta$-редукцию к $p$, то в абстракторе у числа $p$ осталось $z'$, куда мы редуцируем наше второе число, увеличенное на 1. Значит, что вместо $s$ повторений $p$ раз, мы получаем вместо $z'$ ещё $k+1$ повторений $s$, следовательно количество $s$ равно $p+k+1$, что являтся число Чёрча $p + k + 1$, поэтому результат индукционный шага доказан.    
+Каждое число Чёрча можно охарактеризовать количеством $s$ в записи, то есть число $p$ имеет $int(p)$ повторений $s$ в теле лямбда-абстракции, анологично для $k$. Грубо говоря, когда мы применили $\beta$-редукцию к $p$, то в абстракторе у числа $p$ осталось $z'$, куда мы редуцируем наше второе число, увеличенное на 1. Значит, что было $p$ раз повторений $s$, а теперь мы получаем вместо $z'$ ещё $k+1$ повторений $s$, следовательно количество $s$ равно $p+k+1$, что являтся число Чёрча $p + k + 1$, поэтому результат индукционный шага доказан.    
 
-$$\rule{25em}{0.01em}$$
+\subsubsection{Mult.}
 
 База индукции для $mult$: $m = 2$ и $n = 3$.
 
@@ -224,4 +230,43 @@ $$\lambda s z. ((succ \ k) \ s)(\dots(s(s(\dots (s(s(s(\dots (sz) \dots))))\dots
 
 Так мы и получаем $p\cdot (k + 1)$, проводя $\beta$-редукцию. $\ \ \ \ \ \blacksquare$
 
+\subsubsection{Power.}
+
+База индукции для $power = \lambda m n s z. \ n \ m \ s \ z$ при $n = 2$ и $m = 3$.
+
+$$power \ 3 \ 2 = (\lambda m n s z. n \ m \ s \ z) \ 3 \ 2 \rightarrow^{\beta}$$
+$$(\lambda n s z. n \ (\lambda s'z'. s'(s'(s'z'))) \ s \ z) \ 2 \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda s''z''. s''(s''z'')) \ 3 \ s \ z \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda z''. 3 \ (3 \ z'')) \ s \ z \rightarrow^{\beta}$$
+$$\lambda s z. 3 \ (3 \ s) \ z =$$
+$$\lambda s z. 3 \ ((\lambda s'z'. s'(s'(s'z'))) \ s) \ z \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda s''z''. s''(s''(s''z''))) \ (\lambda z'. s(s(sz'))) \ z \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda z''. (\lambda z'. s(s(sz')))((\lambda z'. s(s(sz')))((\lambda z'. s(s(sz')))z''))) \ z \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda z'. s(s(sz')))((\lambda z'. s(s(sz')))((\lambda z'. s(s(sz')))z)) \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda z'. s(s(sz')))((\lambda z'. s(s(sz'))) \ (s(s(sz))) \rightarrow^{\beta}$$
+$$\lambda s z. (\lambda z'. s(s(sz'))) \ (s(s(s(s(s(sz)))))) \rightarrow^{\beta}$$
+$$\lambda s z. s(s(s(s(s(s(s(s(sz)))))))) = 9$$
+
+Скажем, что при $p$ и $k$ выполняется "$power \ p \ k$". Тогда докажем, что $power \ p \ (succ \ k)$ также верно.
+
+$$power \ p \ (succ \ k) = (\lambda m n s z. \ n \ m \ s \ z) \ p \ (succ \ k) \rightarrow^{\beta}$$
+$$(\lambda n s z. \ n \ p \ s \ z) \ (succ \ k) \rightarrow^{\beta}$$
+$$\lambda s z. \ (succ \ k) \ p \ s \ z = \lambda s z. \ (\lambda ns'z'. \ s'(\ n \ s' \ z')) k \ p \ s \ z  \rightarrow^{\beta}$$
+$$\lambda s z. \ (\lambda s'z'. \ s'(\ (\lambda s''z''. s''(s''(\dots (s''z'') \dots))) \ s' \ z')) \ p \ s \ z  \rightarrow^{\beta}$$
+$$\lambda s z. \ (\lambda s'z'. \ s'(\ s'(s'(\dots (s'z') \dots)))) \ p \ s \ z  \rightarrow^{\beta}$$
+$$\lambda s z. \ (\lambda z'. \ p(\ p( \ p(\dots (p \ z') \dots)))) \ s \ z  \rightarrow^{\beta}$$
+$$\lambda s z. \ p(\ p( \ p(\dots (p \ s) \dots))) \ z  =$$
+$$\lambda s z. \ p(\ p( \ p(\dots (\ p(p \ s)) \dots))) \ z  \rightarrow^{\beta}$$
+
+На данный момент наше $p$ повторяется ровно $k + 1$ раз, снова мы можем провести аналогию с вложенными суммами в $mult$, но теперь в $power$ используем вложенный $mult$.
+
+$$\lambda sz. p \ (p \ s) \ z = mult \ p \ p$$
+$$\lambda s z. \ p(\ p( \ p(\dots (\ p(p \ s)) \dots))) \ z  = mult \ p \ (mult \ p (\dots (mult \ p \ p) \dots)) = p^{k+1}$$
+
+Или же по-обычному будем подставлять значения в лямбду-абстракцию.
+$$\lambda s z. \ (\lambda s'z'. s'(\dots (s'z') \dots)) \ (\ p( \ p(\dots (\ p(p \ s)) \dots))) \ z \rightarrow^{\beta}$$
+$$\lambda s z. \ (\lambda z'. p( \ p(\dots (\ p(p \ s)) \dots))(\dots (\ p( \ p(\dots (\ p(p \ s)) \dots))z') \dots)) \ z \rightarrow^{\beta}$$
+$$\lambda s z. \ p( \ p(\dots (\ p(p \ s)) \dots)) \ (\dots (\ p( \ p(\dots (\ p(p \ s)) \dots))z) \dots)$$
+
+В $k+1$ позицию $s$ подставляем $p$, которое в свою очередь будет $p$-раз будет подставляться в во внешнюю значение $p$, что и является возведением в степень: $p^{k+1}$.
 \end{document}
