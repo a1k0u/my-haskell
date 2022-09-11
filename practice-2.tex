@@ -145,7 +145,11 @@ $$counter \ 1 \ 3 = 4$$
 $$length \ [ \ ] \rightarrow^{\beta} (\lambda cn. \ n) \ counter \ 0 = 0$$
 
 \subsubsection{Tail.}
-Создаем счётчик от $length - 1$, он будет конкатенировать до тех пор, пока не достигнет нуля.
+Создаем счётчик от $length - 1$, он будет конкатенировать до тех пор, пока не достигнет нуля. 
+
+Идея также схожа с реализацией $pred$, только вместо $c$ подставляем $adder$. Время работы $\Theta (n)$.
+
+$Adder$ на каждой итерации добавляет в массив новое значение и уменьшает счётчик на единицу. В конце будет возвращен массив без первого элемента.
 $$adder = \lambda e p. \ if \ (isZero \ (snd \ p)) \ (fst \ p) \  (pair \ (cons \ e \ (fst \ p)) \ (pred \ (snd \ p)))$$
 $$tail = \lambda l. \ if \ (isEmpty \ l) \ [ \ ] \ ( l \ adder \ (pair \ nil \ (pred \  (length \ l)))) $$
 
@@ -159,6 +163,8 @@ $$tail \ [5] \twoheadrightarrow^{\beta} (\lambda c n. \ c \ 5 \ n) \  adder \ (p
 $$adder \ 5 \ (pair \ [ \ ] \ 0) \rightarrow^{\beta} [ \ ]$$
 
 \subsection{Уравнения над термами.}
+Используя комбинатор неподвижной точки найдём терм F такой что:
+
 \begin{align*} 
 FM &= MF \\
 FM &= (\lambda m. \ m \ F) \ M \\ 
@@ -178,8 +184,10 @@ F   &= (\lambda f m n. \ n \ f \ (m \ n \ f)) \ F \\
 F   &= Y(\lambda f m n. \ n \ f \ (m \ n \ f)) 
 \end{align*}
 \subsection{Нерекурсивные определения функций.}
-$$f = F \ f \ g$$
-$$g = G \ f \ g$$
+Пусть f и g определены взаимно-рекурсивно. Используя комбинатор неподвижной точки найдем нерекурсивные определения функций f и g.
+
+$$\bold{f = F \ f \ g}$$
+$$\bold{g = G \ f \ g}$$
 
 $$M = pair \ f \ g$$
 $$M = pair \ (F \ (fst \ M) \ (snd \ M)) \ (G \ (fst \ M) \ (snd \ M))$$
