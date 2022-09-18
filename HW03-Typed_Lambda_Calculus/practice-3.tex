@@ -1,0 +1,100 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage{cmap}					% поиск в PDF
+\usepackage{mathtext} 				% русские буквы в формулах
+\usepackage[T2A]{fontenc}			% кодировка
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english,russian]{babel}	% локализация и переносы
+\usepackage{indentfirst}
+\frenchspacing
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools} % AMS
+\usepackage{icomma} % "Умная" запятая: $0,2$ --- число, $0, 2$ --- перечисление
+\DeclareMathOperator{\sgn}{\mathop{sgn}}
+\newcommand*{\hm}[1]{#1\nobreak\discretionary{}
+{\hbox{$\mathsurround=0pt #1$}}{}}
+\usepackage{graphicx}  % Для вставки рисунков
+\graphicspath{{images/}{images2/}}  % папки с картинками
+\setlength\fboxsep{3pt} % Отступ рамки \fbox{} от рисунка
+\setlength\fboxrule{1pt} % Толщина линий рамки \fbox{}
+\usepackage{wrapfig} % Обтекание рисунков текстом
+\usepackage{array,tabularx,tabulary,booktabs} % Дополнительная работа с таблицами
+\usepackage{longtable}  % Длинные таблицы
+\usepackage{multirow} % Слияние строк в таблице
+\theoremstyle{plain} % Это стиль по умолчанию, его можно не переопределять.
+\newtheorem{theorem}{Теорема}[section]
+\newtheorem{proposition}[theorem]{Утверждение}
+\theoremstyle{definition} % "Определение"
+\newtheorem{corollary}{Следствие}[theorem]
+\newtheorem{problem}{Задача}[section]
+\theoremstyle{remark} % "Примечание"
+\newtheorem*{nonum}{Решение}
+\usepackage{etoolbox} % логические операторы
+\usepackage{extsizes} % Возможность сделать 14-й шрифт
+\usepackage{geometry} % Простой способ задавать поля
+	\geometry{top=25mm}
+	\geometry{bottom=35mm}
+	\geometry{left=35mm}
+	\geometry{right=20mm}
+\usepackage{setspace} % Интерлиньяж
+\usepackage{lastpage} % Узнать, сколько всего страниц в документе.
+\usepackage{soul} % Модификаторы начертания
+\usepackage{hyperref}
+\usepackage[usenames,dvipsnames,svgnames,table,rgb]{xcolor}
+\hypersetup{unicode=true, pdftitle={Заголовок}, pdfauthor={Автор},pdfsubject={Тема}, pdfcreator={Создатель}, pdfproducer={Производитель}, pdfkeywords={keyword1} {key2} {key3}, colorlinks=true, linkcolor=red, citecolor=black, filecolor=magenta, urlcolor=cyan}
+\usepackage{csquotes} % Еще инструменты для ссылок
+\usepackage{multicol} % Несколько колонок
+\usepackage{tikz} % Работа с графикой
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+
+\date{ВШЭ ПМИ, 2022 г.} 
+\author{Алексей Косенко}
+
+\begin{document}
+
+\maketitle
+
+\section{Типизированное лямбда-исчисление.}
+\subsection{Заселяем типы.}
+\begin{itemize}
+    \item $\lambda xyz.x \ : \ a \rightarrow b \rightarrow c \rightarrow a$
+    \item $\lambda xyz.y \ : \ a \rightarrow b \rightarrow c \rightarrow b$
+    \item $\lambda xyz.z \ : \ a \rightarrow b \rightarrow a \rightarrow a$
+    \item $\lambda xyz.x \ : \ a \rightarrow a \rightarrow a \rightarrow a$
+\end{itemize}
+
+\subsection{Найдем обитателей типов.}
+$\lambda xyzw. \ y \ (x \ w \ w) \ (z \ w) \ : \ (d \rightarrow d \rightarrow a) \rightarrow (a \rightarrow b \rightarrow c) \rightarrow (d \rightarrow b) \rightarrow d \rightarrow c$
+\\
+
+Для типа $(d \rightarrow d \rightarrow a) \rightarrow (c \rightarrow a) \rightarrow (a \rightarrow b) \rightarrow d \rightarrow c \rightarrow d$ существует два терма. Тело лямбда-функции должно быть типа $b$, есть только одна вершина, в которой получается этот тип, и два ребра, чтобы добраться до него.
+\begin{itemize}
+    \item $\lambda xyzwk. \ z \ (x \ w \ w)$
+    \item $\lambda xyzwk. \ z \ (y \ k)$ 
+\end{itemize}
+
+\subsection{Типизируем по Чёрчу.}
+Типизируем аппликацию комбинаторов по Чёрчу. 
+$$S K K = (\lambda f^{\alpha \rightarrow (\beta \rightarrow \alpha) \rightarrow \alpha} g^{\alpha \rightarrow \beta \rightarrow \alpha} x^{\alpha}. \ f \ x \ (g \ x)) \ (\lambda x^{\alpha} y^{\beta \rightarrow \alpha}. x) \ (\lambda x^{\alpha} y^{\beta}. x) : \alpha \rightarrow \alpha$$
+$$SKI = (\lambda f^{\alpha \rightarrow \alpha \rightarrow \alpha} g^{\alpha \rightarrow \alpha} x^{\alpha}. \ f \ x \ (g \ x)) \ (\lambda x^{\alpha} y^{\alpha}. \ x) \ (\lambda x^{\alpha}. \ x) \ : \ \alpha \rightarrow \alpha$$
+\subsection{Конструируем термы с условием.}
+
+Сконструируем терм типа: $(c \rightarrow e) \rightarrow ((c \rightarrow e) \rightarrow e) \rightarrow e$, которому нельзя будет приписать $a \rightarrow (a \rightarrow e) \rightarrow e$. Добьемся этого мы тем, что внутри лямбда-абстрации пропишем вложенную абстракцию. 
+
+Итак, наша внутренняя лямбда-абстракция будет принимать тип $c$, а возвращать тип $e$, результатом последнего является аппликация внешних термов.
+
+$$\lambda x y. \ y \ (\lambda z. \ y \ x) : (c \rightarrow e) \rightarrow ((c \rightarrow e) \rightarrow e) \rightarrow e$$
+
+
+\subsection{Сложная конструкция.}
+Для первого сформируем абстракцию, которая принимает $a$ и возвращает $b$ (\textit{аппликация в теле}), то есть $a \rightarrow b$, тогда получим:
+$$\lambda x y. \ x \ (\lambda z. \ y \ z \ z) : ((a \rightarrow b) \rightarrow a) \rightarrow (a \rightarrow a \rightarrow b) \rightarrow a$$
+
+Во втором будет дважды повторяться терм, который возврает $a \rightarrow b$ для того, чтобы путём аппликации с $x$ получить $a$.
+$$\lambda xy. \ y \ (x \ (\lambda z. \ y \ z \ z)) \ (x \ (\lambda z. \ y \ z \ z)) : ((a \rightarrow b) \rightarrow a) \rightarrow (a \rightarrow a \rightarrow b) \rightarrow b$$
+
+Третье, оно же самое вложенное, должны получить: $((((a \rightarrow b) \rightarrow a) \rightarrow a) \rightarrow b) \rightarrow b$. В самом вложенном получим $a \rightarrow b$, затем $((a \rightarrow b) \rightarrow a) \rightarrow a$, чтобы после получить $b$, апплицируя с $x$.
+$$\lambda x. \ x \ (\lambda z_1^{(a \rightarrow b) \rightarrow a}. \ z_1 \ (\lambda z_2^{a}. \ (\lambda z_3^{a \rightarrow b}. \ z_3 \ z_2)))$$
+
+
+
+\end{document}
