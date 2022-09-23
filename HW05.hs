@@ -139,3 +139,34 @@ movingLists n [] = []
 movingLists n xs | length list < n = []
                  | otherwise       = list : movingLists n (tail xs)
   where list = createNList n xs
+
+
+{-
+    Construct function cmp, comparing LogLevel elements
+    with order: Error > Warning > Info.
+-}
+
+data LogLevel = Error | Warning | Info
+
+cmp :: LogLevel -> LogLevel -> Ordering
+cmp Error Error     = EQ
+cmp Warning Warning = EQ
+cmp Info Info       = EQ
+
+cmp Error Warning   = GT
+cmp Error Info      = GT
+cmp Warning Error   = LT
+cmp Info Error      = LT
+
+cmp Info Warning    = LT
+cmp Warning Info    = GT
+
+
+{-
+
+-}
+
+data Person = Person { firstName :: String, lastName :: String, age :: Int }
+
+abbrFirstName :: Person -> Person
+abbrFirstName p = undefined
