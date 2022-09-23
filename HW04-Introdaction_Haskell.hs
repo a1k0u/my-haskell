@@ -1,82 +1,104 @@
--- Double factorial.
+{-
+    Double factorial.
+
+    10!! = 2 * 4 * 6 * 8 * 10
+    11!! = 11 * 9 * 7 * 5 * 3 * 1
+-}
 
 doubleFact :: Integer -> Integer
-doubleFact n = if n <= 2 then n else n * doubleFact (n - 2) 
+doubleFact n | n <= 2    = n
+             | otherwise = n * doubleFact (n - 2)
 
--- Sum digits of number and count amount of digits.
+
+{-
+    Build a function that finds b_n for O(n).
+
+    b_0​ = 1; b_1 ​= 2; b_2 ​= 3; b_{k+3}​ = b_{k+2}​ − 2b_{k + 1​} + 3b_{k}​.
+-}
+
+fstTrio :: (a, (a, a)) -> a
+fstTrio = fst
+
+sndTrio :: (a, (a, a)) -> a
+sndTrio t = fst (snd t)
+
+trdTrio :: (a, (a, a)) -> a
+trdTrio t = snd (snd t)
+
+moveTrio :: (a, (a, a)) -> a -> (a, (a, a))
+moveTrio t = trio (sndTrio t) (trdTrio t)
+
+trio :: a -> a -> a -> (a, (a, a))
+trio x y z = (x, (y, z))
+
+nextSeq :: Num a => (a, (a, a)) -> a
+nextSeq t = trdTrio t - 2 * sndTrio t + 3 * fstTrio t
+
+seqBHelper :: (Eq t, Num t, Num a) => (a, (a, a)) -> t -> a
+seqBHelper trio n
+  | n == 0    = trdTrio trio
+  | otherwise = seqBHelper (moveTrio trio (nextSeq trio)) (n - 1)
+
+seqB :: Integer -> Integer
+seqB n | n == 0    = 1
+       | n == 1    = 2
+       | n == 2    = 3
+       | otherwise = seqBHelper (trio 1 2 3) (n - 2)
+
+
+{-
+    Fibonacci in linear form.
+
+    fibonacci (-99) -> 218922995834555169026
+-}
+
+accFib :: (Integer, Integer) -> Integer -> Integer
+accFib accPair counter
+  | counter == 0 = fst accPair
+  | otherwise    = accFib (uncurry (+) accPair, fst accPair) (counter - 1)
+
+fibonacci :: Integer -> Integer
+fibonacci n | n < 0     = res * (-1) ^ mod (n + 1) 2
+            | otherwise = res
+  where res = accFib (0, 1) (goToPositive n)
+
+
+{-
+    Sum digits of number and count amount of digits.
+
+    sum'n'count (-39) -> (12,2)
+-}
 
 goToPositive :: Integer -> Integer
-goToPositive n = if n < 0 then n * (-1) else n
+goToPositive n | n < 0     = n * (-1)
+               | otherwise = n
 
 countDigits :: (Integer, Integer) -> Integer -> (Integer, Integer)
-countDigits accPair n = 
-    if n < 10 
-    then (
-            (fst accPair) + n,
-            (snd accPair) + 1
-         ) 
-    else 
-        countDigits
-            (
-                (fst accPair) + (mod n 10),
-                (snd accPair) + 1
-            ) 
-            (div n 10)
-
+countDigits accPair n
+  | n < 10    = (fst accPair + n, snd accPair + 1)
+  | otherwise = countDigits (fst accPair + mod n 10, snd accPair + 1) (div n 10)
 
 sum'n'count :: Integer -> (Integer, Integer)
 sum'n'count x = countDigits (0, 0) (goToPositive x)
 
--- Fibonacci: exponensial and linear form.
 
-fib' :: Integer -> Integer 
-fib' n
-   | n < 2 = n
-   | otherwise = (fib' (n - 2)) +  (fib' (n - 1))
+{-
+    Integration by trapezium method.
 
-
-accFib :: (Integer, Integer) -> Integer -> Integer
-accFib accPair counter  =
-    if counter == 0
-    then (fst accPair)
-    else
-        accFib
-            ((fst accPair) + (snd accPair), fst accPair) (counter - 1)
-
-fibonacci :: Integer -> Integer
-fibonacci n = 
-    let res = accFib (0, 1) (goToPositive n) 
-    in 
-        if n < 0 
-        then res * (-1) ^ (mod (n + 1) 2) 
-        else res
-
-
--- Integration by trapezium method.
+-}
 
 getStep :: Double -> Double -> Double -> Double
-getStep r l p = (r - l) / p 
+getStep l r p = (r - l) / p
 
-sumTrapeziums f pos acc step iter iterStop = 
-    if (iter == iterStop) 
-    then acc
-    else sumTrapeziums 
-             f 
-             (pos + step) 
-             (acc + (f pos)) 
-             step 
-             (iter + 1) 
-             iterStop
+sumTrapeziums f pos b step iter
+  | iter == 0 = 0
+  | otherwise = f pos + sumTrapeziums f (pos + step) b step (iter - 1)
 
 integration :: (Double -> Double) -> Double -> Double -> Double
-integration f a b = 
-    let
-        parts = 1000000  
-        step = getStep a b parts
-    in 
-        (
-            0.5 * (f a) +
-            (sumTrapeziums f b 0 step 0 parts) +
-            0.5 * (f b)
-        ) * step
-
+integration f a b
+  | a == b    = 0
+  | a > b     = -integration f b a
+  | otherwise = ((f a + f b) / 2 + sumTrapeziums f a b step parts) * step
+ where
+  parts = 1000
+  step  = getStep a b parts
