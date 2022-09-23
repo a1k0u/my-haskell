@@ -1,8 +1,25 @@
+-- Convert integer from negative to positive.
+goToPositive :: Integer -> Integer
+goToPositive n | n < 0     = n * (-1)
+               | otherwise = n
+
+-- Calculate amount of defite digit in integer array.
+countDigits :: [Integer] -> Integer -> Integer
+countDigits [] d = 0
+countDigits (n : ns) d | n == d    = 1 + countDigits ns d
+                       | otherwise = countDigits ns d
+
+-- Convert integer into bool by some function.
+convertIntBool :: Integer -> (Integer -> Bool) -> Bool
+convertIntBool num func | func num  = True
+                        | otherwise = False
+
+
 {-
     Sums three array by each element.
 
-    Create all state for each array,
-    it's like enumeration of all conditions.
+    Here created all state for each array,
+    it's like enumeration of all array conditions.
 -}
 
 sum3 :: [Integer] -> [Integer] -> [Integer] -> [Integer]
@@ -26,10 +43,6 @@ sum3 (x : xs) (y : ys) (z : zs) = (x + y + z) : sum3 xs ys zs
     then split it by recursion.
 -}
 
-goToPositive :: Integer -> Integer
-goToPositive n | n < 0     = n * (-1)
-               | otherwise = n
-
 splitDigits :: Integer -> [Integer]
 splitDigits n | n < 10    = [n]
               | otherwise = splitDigits (div n 10) ++ [mod n 10]
@@ -37,35 +50,44 @@ splitDigits n | n < 10    = [n]
 digits :: Integer -> [Integer]
 digits n = splitDigits num where num = goToPositive n
 
--- Containg
+
+{-
+    containsAllDigits:
+        Check out if all numbers from 1 to 9 contains in number.
+
+    containsAllDigitsOnes:
+        The same as previous task, but every digit has to be only in number.
+
+    Split number, start our counter with function to convert integer into bool.
+-}
+
+containsAllHelper :: [Integer] -> Integer -> (Integer -> Bool) -> Bool
+containsAllHelper digits counter func
+  | counter == 10
+  = True
+  | otherwise
+  = convertIntBool (countDigits digits counter) func
+    && containsAllHelper digits (counter + 1) func
+
+containsAllDigits :: Integer -> Bool
+containsAllDigits n = containsAllHelper d 1 (0 /=) where d = digits n
+
+containsAllDigitsOnes :: Integer -> Bool
+containsAllDigitsOnes n = containsAllHelper d 1 (1 ==) where d = digits n
+
 
 {-
 
 -}
 
+sliceList :: Int -> Int -> [a] -> Int -> [a]
+sliceList l r [] pos = []
+sliceList l r (x : xs) pos
+  | l <= pos && pos < r = x : sliceList l r xs (pos + 1)
+  | pos < l             = sliceList l r xs (pos + 1)
+  | otherwise           = []
 
-countDigits :: [Integer] -> Integer -> Integer
-countDigits [] d = 0
-countDigits (n : ns) d
-    | n == d    = 1 + countDigits ns d
-    | otherwise = countDigits ns d
 
-convertIntBool :: Integer -> (Integer -> Bool) -> Bool
-convertIntBool num func
-    | func num  = True
-    | otherwise = False
-
-containsAllHelper :: [Integer] -> Integer -> (Integer -> Bool) -> Bool
-containsAllHelper digits counter func
-    | counter == 10 = True
-    | otherwise     =
-        convertIntBool (countDigits digits counter) func &&
-            containsAllHelper digits (counter + 1) func
-
-containsAllDigits :: Integer -> Bool
-containsAllDigits n = containsAllHelper d 1 (0 /=) where d = digits n
-
--- Contains all digits ones
-
-containsAllDigitsOnes :: Integer -> Bool
-containsAllDigitsOnes n = containsAllHelper d 1 (1 ==) where d = digits n
+sublist :: Int -> Int -> [a] -> [a]
+sublist l r xs | l >= r    = []
+               | otherwise = sliceList l r xs 0
