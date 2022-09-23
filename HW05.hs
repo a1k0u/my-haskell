@@ -20,6 +20,8 @@ convertIntBool num func | func num  = True
 
     Here created all state for each array,
     it's like enumeration of all array conditions.
+
+    sum3 [1,2,3] [4,5] [6] -> [11,7,3]
 -}
 
 sum3 :: [Integer] -> [Integer] -> [Integer] -> [Integer]
@@ -41,6 +43,8 @@ sum3 (x : xs) (y : ys) (z : zs) = (x + y + z) : sum3 xs ys zs
 
     Firstly convert number from negative to positive,
     then split it by recursion.
+
+    digits 73643 -> [7, 3, 6, 4, 3]
 -}
 
 splitDigits :: Integer -> [Integer]
@@ -55,8 +59,12 @@ digits n = splitDigits num where num = goToPositive n
     containsAllDigits:
         Check out if all numbers from 1 to 9 contains in number.
 
+    containsAllDigits (-123455556789) -> True
+
     containsAllDigitsOnes:
         The same as previous task, but every digit has to be only in number.
+
+    containsAllDigitsOnes(-120003400567809) -> True
 
     Split number, start our counter with function to convert integer into bool.
 -}
@@ -77,17 +85,57 @@ containsAllDigitsOnes n = containsAllHelper d 1 (1 ==) where d = digits n
 
 
 {-
+    Slicing list of [a, ...] from 'l' to 'r'.
+    And returns this part.
 
+    sublist 1 3 "abcdef"   -> "bc"
+    sublist 0 10 [1, 2, 3] -> [1, 2, 3]
+    sublist 3 10 [1..]     -> [4,5,6,7,8,9,10]
 -}
 
-sliceList :: Int -> Int -> [a] -> Int -> [a]
-sliceList l r [] pos = []
-sliceList l r (x : xs) pos
-  | l <= pos && pos < r = x : sliceList l r xs (pos + 1)
-  | pos < l             = sliceList l r xs (pos + 1)
+sublistHelper :: Int -> Int -> [a] -> Int -> [a]
+sublistHelper l r [] pos = []
+sublistHelper l r (x : xs) pos
+  | l <= pos && pos < r = x : sublistHelper l r xs (pos + 1)
+  | pos < l             = sublistHelper l r xs (pos + 1)
   | otherwise           = []
 
 
 sublist :: Int -> Int -> [a] -> [a]
-sublist l r xs | l >= r    = []
-               | otherwise = sliceList l r xs 0
+sublist l r xs = sublistHelper l r xs 0
+
+
+{-
+    Repeat each element from list n-times,
+    returns array of this repetition.
+
+    repeatEveryElem 3 "abc"     -> "aaabbbccc"
+    repeatEveryElem 2 [1, 2, 3] -> [1, 1, 2, 2, 3, 3]
+-}
+
+repeatElemHelper :: a -> Int -> Int -> [a]
+repeatElemHelper el i cnt | i == cnt  = []
+                          | otherwise = el : repeatElemHelper el (i + 1) cnt
+
+repeatEveryElem :: Int -> [a] -> [a]
+repeatEveryElem cnt = foldr (\x -> (++) (repeatElemHelper x 0 cnt)) []
+
+
+{-
+    The list is given (possibly infinite) and a positive integer.
+    Create a of "sliding" sublists of length n that is,
+    a list of lists of the following type:
+
+    movingLists 2 [5..8] -> [[5,6],[6,7],[7,8]]
+-}
+
+createNList :: Int -> [a] -> [a]
+createNList n [] = []
+createNList n (x : xs) | n == 0    = []
+                       | otherwise = x : createNList (n - 1) xs
+
+movingLists :: Int -> [a] -> [[a]]
+movingLists n [] = []
+movingLists n xs | length list < n = []
+                 | otherwise       = list : movingLists n (tail xs)
+  where list = createNList n xs
