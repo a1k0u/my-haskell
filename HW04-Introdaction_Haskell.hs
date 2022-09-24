@@ -85,20 +85,18 @@ sum'n'count x = countDigits (0, 0) (goToPositive x)
 {-
     Integration by trapezium method.
 
+    integration sin pi 0 -> -2.0
 -}
 
 getStep :: Double -> Double -> Double -> Double
 getStep l r p = (r - l) / p
 
-sumTrapeziums f pos b step iter
-  | iter == 0 = 0
-  | otherwise = f pos + sumTrapeziums f (pos + step) b step (iter - 1)
-
 integration :: (Double -> Double) -> Double -> Double -> Double
-integration f a b
-  | a == b    = 0
-  | a > b     = -integration f b a
-  | otherwise = ((f a + f b) / 2 + sumTrapeziums f a b step parts) * step
+integration f a b | a == b    = 0
+                  | a > b     = -integration f b a
+                  | otherwise = (sumTrapeziums + t) * step
  where
-  parts = 1000
-  step  = getStep a b parts
+  parts         = 1000
+  sumTrapeziums = sum (map f [a + step, a + 2 * step .. b - step])
+  t             = (f a + f b) / 2
+  step          = getStep a b parts
