@@ -149,24 +149,64 @@ movingLists n xs | length list < n = []
 data LogLevel = Error | Warning | Info
 
 cmp :: LogLevel -> LogLevel -> Ordering
-cmp Error Error     = EQ
+cmp Error   Error   = EQ
 cmp Warning Warning = EQ
-cmp Info Info       = EQ
+cmp Info    Info    = EQ
 
-cmp Error Warning   = GT
-cmp Error Info      = GT
+cmp Error   Warning = GT
+cmp Error   Info    = GT
 cmp Warning Error   = LT
-cmp Info Error      = LT
+cmp Info    Error   = LT
 
-cmp Info Warning    = LT
+cmp Info    Warning = LT
 cmp Warning Info    = GT
 
 
 {-
+    Implement the abbrFirstName function, which shortens the name
+    to the first letter with a dot, that is, if the name was "John",
+    then after applying this function, it will turn into "J.".
+    However, if the name was shorter than two characters, then it does not change.
 
+    ghci> let p = Person {firstName = "Adam", lastName = "Smith", age = 66}
+    ghci> abbrFirstName p
+    Person {firstName = "A.", lastName = "Smith", age = 66}
 -}
 
-data Person = Person { firstName :: String, lastName :: String, age :: Int }
+data Person = Person
+  { firstName :: String
+  , lastName  :: String
+  , age       :: Int
+  }
+  deriving Show
+
+newName :: String -> String
+newName name | length name <= 2 = name
+             | otherwise        = head name : "."
 
 abbrFirstName :: Person -> Person
-abbrFirstName p = undefined
+abbrFirstName Person { firstName = f, lastName = l, age = a } =
+  Person (newName f) l a
+
+
+{-
+    Tree       - binary tree.
+    treeSum    - find sum of all elements (Nodes).
+    treeHeight - find out tree height.
+
+    GHCi> let tree = Node (Node (Node Leaf 1 Leaf) 2 Leaf) 3 (Node Leaf 4 Leaf)
+    GHCi> (treeSum tree, treeHeight tree)
+    (10,3)
+-}
+
+data Tree a = Leaf | Node (Tree a) a (Tree a)
+  deriving Show
+
+treeSum :: Tree Integer -> Integer
+treeSum Leaf                = 0
+treeSum (Node left x right) = treeSum left + x + treeSum right
+
+treeHeight :: Tree a -> Int
+treeHeight Leaf = 0
+treeHeight (Node left x right) =
+  max (1 + treeHeight left) (1 + treeHeight right)
