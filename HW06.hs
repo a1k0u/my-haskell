@@ -5,6 +5,7 @@
 -- {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 import           Data.Complex
+import qualified Data.Foldable                 as F
 import           Data.List
 import           Data.Maybe                     ( isNothing )
 import           Distribution.Simple.Build      ( build )
@@ -49,73 +50,54 @@ instance Show a => Show (Matrix a) where
         -2.7-i*3.4
 
 -}
-data Tree a = Leaf | Node (Tree a) a (Tree a)
+-- data Tree a = Leaf | Node (Tree a) a (Tree a)
 
-elemTree :: Eq a => a -> Tree a -> Bool
-elemTree x tree = check [tree]
- where
-  check []          = False
-  check (Leaf : xs) = check xs
-  check ((Node l el r) : xs) | el == x   = True
-                             | otherwise = check (xs ++ [l, r])
+-- elemTree :: Eq a => a -> Tree a -> Bool
+-- elemTree x tree = check [tree]
+--  where
+--   check []          = False
+--   check (Leaf : xs) = check xs
+--   check ((Node l el r) : xs) | el == x   = True
+--                              | otherwise = check (xs ++ [l, r])
 
-instance Eq a => Eq (Tree a) where
-  (==) :: Tree a -> Tree a -> Bool
-  (/=) :: Tree a -> Tree a -> Bool
-  tree1 == tree2 = go [tree1] [tree2]
-   where
-    go []          []          = True
-    go (Leaf : xs) (Leaf : ys) = go xs ys
-    go ((Node l1 x1 r1) : xs) ((Node l2 x2 r2) : ys)
-      | x1 /= x2  = False
-      | otherwise = go (xs ++ [l1, r1]) (ys ++ [l2, r2])
+-- instance Eq a => Eq (Tree a) where
+--   (==) :: Tree a -> Tree a -> Bool
+--   (/=) :: Tree a -> Tree a -> Bool
+--   tree1 == tree2 = go [tree1] [tree2]
+--    where
+--     go []          []          = True
+--     go (Leaf : xs) (Leaf : ys) = go xs ys
+--     go ((Node l1 x1 r1) : xs) ((Node l2 x2 r2) : ys)
+--       | x1 /= x2  = False
+--       | otherwise = go (xs ++ [l1, r1]) (ys ++ [l2, r2])
 
-  tree1 /= tree2 = not (tree1 == tree2)
-
-
-instance Functor Tree where
-  fmap :: (a -> b) -> Tree a -> Tree b
-  fmap f t1 = buildTree f t1
-   where
-    buildTree f Leaf         = Leaf
-    buildTree f (Node l x r) = Node (buildTree f l) (f x) (buildTree f r)
+--   tree1 /= tree2 = not (tree1 == tree2)
 
 
-instance Show a => Show (Tree a) where
-  show tree = buildTree tree
-   where
-    buildTree Leaf         = "{}"
-    buildTree (Node l x r) = "<" ++ buildTree l ++ show x ++ buildTree r ++ ">"
+-- instance Functor Tree where
+--   fmap :: (a -> b) -> Tree a -> Tree b
+--   fmap f t1 = buildTree f t1
+--    where
+--     buildTree f Leaf         = Leaf
+--     buildTree f (Node l x r) = Node (buildTree f l) (f x) (buildTree f r)
 
 
-instance Read a => Read (Tree a) where
-  readsPrec _ ('{' : '}' : l) = [(Leaf, l)]
-  readsPrec _ ('<' : rest1) =
-    [ (Node l el r, s)
-    | (l , rest2  ) <- reads rest1
-    , (el, rest3  ) <- reads rest2
-    , (r , '>' : s) <- reads rest3
-    ]
-  readsPrec _ _ = []
-
-data List a = Nil | Cons a (List a)
-
-instance Read a => Read (List a) where
-  readsPrec _ input = myReadsList input
+-- instance Show a => Show (Tree a) where
+--   show tree = buildTree tree
+--    where
+--     buildTree Leaf         = "{}"
+--     buildTree (Node l x r) = "<" ++ buildTree l ++ show x ++ buildTree r ++ ">"
 
 
-myReadsList :: (Read a) => ReadS (List a)
-myReadsList ('|' : s) = [(Nil, s)]
-myReadsList ('<' : s) =
-  [ (Cons x l, u) | (x, t) <- reads s, (l, '>' : u) <- myReadsList t ]
-
-
-
--- myReadsTree :: (Read a) => ReadS (Tree a)
--- myReadsTree ('<':s) = [(Node l x r, u) |
---             (l, '>':p1) <- myReadsTree s,
---             (x, '<':p2) <- reads p1,
---             (r, '>':u) <- myReadsTree p2]
+-- instance Read a => Read (Tree a) where
+--   readsPrec _ ('{' : '}' : l) = [(Leaf, l)]
+--   readsPrec _ ('<' : rest1) =
+--     [ (Node l el r, s)
+--     | (l , rest2  ) <- reads rest1
+--     , (el, rest3  ) <- reads rest2
+--     , (r , '>' : s) <- reads rest3
+--     ]
+--   readsPrec _ _ = []
 
 
 newtype Cmplx = Cmplx (Complex Double) deriving Eq
@@ -174,23 +156,6 @@ comb n elements =
   | (e1, i) <- zip elements [1 ..]
   , e2      <- comb (n - 1) (drop i elements)
   ]
-
-
--- instance (Read a) => Read (Tree a) where
-
---         readsPrec d r =  readParen (d > app_prec)
---                          (\r -> [(Leaf m,t) |
---                                  ("Leaf",s) <- lex r,
---                                  (m,t) <- readsPrec (app_prec+1) s]) r
-
---                       ++ readParen (d > up_prec)
---                          (\r -> [(u:^:v,w) |
---                                  (u,s) <- readsPrec (up_prec+1) r,
---                                  (":^:",t) <- lex s,
---                                  (v,w) <- readsPrec (up_prec+1) t]) r
-
---           where app_prec = 10
---                 up_prec = 5
 
 
 class (Eq a, Enum a, Bounded a) => SafeEnum a where
@@ -270,7 +235,38 @@ class (Eq a, Enum a, Bounded a) => SafeEnum a where
 
 foldl'' :: (b -> a -> b) -> b -> [a] -> b
 foldl'' f v xs = foldr (fun f) ini xs v
-fun = undefined
-ini = undefined
+fun f a g x = g (f x a)
+ini = id
 
 
+data Tree a = Nil | Branch (Tree a) a (Tree a)   deriving (Eq, Show)
+newtype Preorder a   = PreO   (Tree a)    deriving (Eq, Show)
+newtype Postorder a  = PostO  (Tree a)    deriving (Eq, Show)
+newtype Levelorder a = LevelO (Tree a)    deriving (Eq, Show)
+
+tree = Branch (Branch Nil 1 (Branch Nil 2 Nil)) 3 (Branch Nil 4 Nil)
+
+
+instance F.Foldable Tree where
+  foldMap f Nil = mempty
+  foldMap f (Branch l x r) =
+    F.foldMap f l `mappend` f x `mappend` F.foldMap f r
+
+instance F.Foldable Preorder where
+  foldMap f (PreO Nil) = mempty
+  foldMap f (PreO (Branch l x r)) =
+    f x `mappend` F.foldMap f (PreO l) `mappend` F.foldMap f (PreO r)
+
+instance F.Foldable Postorder where
+  foldMap f (PostO Nil) = mempty
+  foldMap f (PostO (Branch l x r)) =
+    F.foldMap f (PostO l) `mappend` F.foldMap f (PostO r) `mappend` f x
+
+instance F.Foldable Levelorder where
+  foldMap f (LevelO current) = down [current] []
+   where
+    down []             []   = mempty
+    down []             sndQ = down (reverse sndQ) []
+    down (Nil : others) sndQ = down others sndQ
+    down (Branch l x r : others) sndQ =
+      f x `mappend` down others (r : l : sndQ)
