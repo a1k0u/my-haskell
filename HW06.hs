@@ -5,10 +5,10 @@
 -- {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 import           Data.Complex
-import qualified Data.Foldable                 as F
+import qualified Data.Foldable             as F
 import           Data.List
-import           Data.Maybe                     ( isNothing )
-import           Distribution.Simple.Build      ( build )
+import           Data.Maybe                (isNothing)
+import           Distribution.Simple.Build (build)
 
 newtype Matrix a = Matrix [[a]]
 
