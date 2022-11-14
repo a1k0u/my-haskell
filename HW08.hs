@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE InstanceSigs     #-}
 import           Data.List
-
 import           Control.Applicative (ZipList (ZipList), getZipList)
 
 data E l r = L l | R r
