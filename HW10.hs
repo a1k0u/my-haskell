@@ -69,9 +69,9 @@ surround x y zs = concat $ do
 
 lookups :: (Eq k) => k -> [(k,v)] -> [v]
 lookups x ys = do
-                y <- ys
-                True <- return $ x == fst y
-                return $ snd y
+                (k, v) <- ys
+                True <- return $ x == k
+                return $ v
 
 --
 
@@ -105,7 +105,7 @@ concat3OC (Un x0) (Bi x1 y1 z1) o2  = Bi x0 x1 (concat3OC (Un y1) z1 o2)
 --
 
 concatOC :: OddC (OddC a) -> OddC a
-concatOC (Bi x y z) = concat3OC x y (concatOC z)
+concatOC (Bi x y z) = concat3OC x y $ concatOC z
 concatOC (Un x) = x
 
 --
