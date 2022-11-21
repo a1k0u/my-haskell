@@ -11,17 +11,17 @@ data Result a = Ok a | Error String
 instance Functor Result where
   fmap :: (a -> b) -> Result a -> Result b
   fmap _ (Error x) = Error x
-  fmap f (Ok a)    = Ok (f a)
+  fmap f (Ok    a) = Ok (f a)
 
 instance Foldable Result where
   foldMap :: Monoid m => (a -> m) -> Result a -> m
   foldMap _ (Error x) = mempty
-  foldMap f (Ok x)    = f x
+  foldMap f (Ok    x) = f x
 
 instance Traversable Result where
   traverse :: Applicative f => (a -> f b) -> Result a -> f (Result b)
   traverse _ (Error x) = pure $ Error x
-  traverse f (Ok a)    = Ok <$> f a
+  traverse f (Ok    a) = Ok <$> f a
 
 --
 
@@ -96,63 +96,65 @@ instance Traversable NEList where
 
 --
 
-data Triple a = Tr a a a  deriving (Eq, Show)
+data Triple a = Tr a a a
+  deriving (Eq, Show)
 
 instance Foldable Triple where
-    foldl f ini (Tr x y z) = f (f (f ini x) y) z
-    foldr f ini (Tr x y z) = f x (f y (f z ini))
+  foldl f ini (Tr x y z) = f (f (f ini x) y) z
+  foldr f ini (Tr x y z) = f x (f y (f z ini))
 
 instance Functor Triple  where
-    fmap :: (a -> b) -> Triple a -> Triple b
-    fmap f (Tr a1 a2 a3) = Tr (f a1) (f a2) (f a3)
+  fmap :: (a -> b) -> Triple a -> Triple b
+  fmap f (Tr a1 a2 a3) = Tr (f a1) (f a2) (f a3)
 
 instance Applicative Triple where
-    pure :: a -> Triple a
-    pure x = Tr x x x
-    (<*>) :: Triple (a -> b) -> Triple a -> Triple b
-    (Tr a1 a2 a3) <*> (Tr b1 b2 b3) = Tr (a1 b1) (a2 b2) (a3 b3)
+  pure :: a -> Triple a
+  pure x = Tr x x x
+  (<*>) :: Triple (a -> b) -> Triple a -> Triple b
+  (Tr a1 a2 a3) <*> (Tr b1 b2 b3) = Tr (a1 b1) (a2 b2) (a3 b3)
 
 instance Traversable Triple where
-    traverse f (Tr x y z) = Tr <$> f x <*> f y <*> f z
+  traverse f (Tr x y z) = Tr <$> f x <*> f y <*> f z
 
 --
 
 data Tree a = Nil | Branch (Tree a) a (Tree a) deriving (Eq, Show)
 
 instance Functor Tree where
-    fmap f Nil            = Nil
-    fmap f (Branch l x r) = Branch (fmap f l) (f x) (fmap f r)
+  fmap f Nil            = Nil
+  fmap f (Branch l x r) = Branch (fmap f l) (f x) (fmap f r)
 
 instance Applicative Tree where
-    pure x = Branch (pure x) x (pure x)
-    Nil <*> _ = Nil
-    _ <*> Nil = Nil
-    (Branch l1 x1 r1) <*> (Branch l2 x2 r2) = Branch (l1 <*> l2) (x1 x2) (r1 <*> r2)
+  pure x = Branch (pure x) x (pure x)
+  Nil <*> _   = Nil
+  _   <*> Nil = Nil
+  (Branch l1 x1 r1) <*> (Branch l2 x2 r2) =
+    Branch (l1 <*> l2) (x1 x2) (r1 <*> r2)
 
 instance Foldable Tree where
-    foldMap _ Nil            = mempty
-    foldMap f (Branch l x r) = foldMap f l <> f x <> foldMap f r
+  foldMap _ Nil            = mempty
+  foldMap f (Branch l x r) = foldMap f l <> f x <> foldMap f r
 
 
 instance Traversable Tree where
-    traverse _ Nil            = pure Nil
-    traverse f (Branch l x r) = Branch <$> traverse f l <*> f x <*> traverse f r
+  traverse _ Nil            = pure Nil
+  traverse f (Branch l x r) = Branch <$> traverse f l <*> f x <*> traverse f r
 
 --
 
 newtype Cmps f g x = Cmps { getCmps :: f (g x) }   deriving (Eq,Show)
 
 instance (Foldable f, Foldable g) => Foldable (Cmps f g) where
-    foldr f ini (Cmps x) = foldr (flip (foldr f)) ini x
-    foldl f ini (Cmps x) = foldl (foldl f) ini x
+  foldr f ini (Cmps x) = foldr (flip (foldr f)) ini x
+  foldl f ini (Cmps x) = foldl (foldl f) ini x
 
 --
 
 instance (Functor f, Functor g) => Functor (Cmps f g) where
-    fmap f (Cmps x) = Cmps $ fmap (fmap f) x
+  fmap f (Cmps x) = Cmps $ fmap (fmap f) x
 
 instance (Traversable f, Traversable g) => Traversable (Cmps f g) where
-    traverse f (Cmps x) = Cmps <$> traverse (traverse f) x
+  traverse f (Cmps x) = Cmps <$> traverse (traverse f) x
 
 
 --
@@ -160,10 +162,10 @@ instance (Traversable f, Traversable g) => Traversable (Cmps f g) where
 newtype Parser a = Parser { apply :: String -> [(a, String)] }
 
 instance Functor Parser where
-  fmap  = undefined
+  fmap = undefined
 
 instance Applicative Parser where
-  pure = undefined
+  pure  = undefined
   (<*>) = undefined
 
 instance Alternative Parser where
@@ -179,13 +181,13 @@ class Functor f => Monoidal f where
 
 instance Monoidal Maybe where
   unit = Just ()
-  (*&*) _ Nothing         = Nothing
-  (*&*) Nothing _         = Nothing
+  (*&*) _        Nothing  = Nothing
+  (*&*) Nothing  _        = Nothing
   (*&*) (Just x) (Just y) = Just (x, y)
 
 instance Monoid s => Monoidal ((,) s) where
   unit = (mempty, ())
-  (*&*) (x, y) (x', y')= (mappend x x', (y, y'))
+  (*&*) (x, y) (x', y') = (mappend x x', (y, y'))
 
 instance Monoidal ((->) e) where
   unit = mempty
@@ -196,7 +198,7 @@ instance Monoidal ((->) e) where
 unit' :: Applicative f => f ()
 unit' = pure ()
 
-pair' :: Applicative f => f a -> f b -> f (a,b)
+pair' :: Applicative f => f a -> f b -> f (a, b)
 pair' a b = (,) <$> a <*> b
 
 --
